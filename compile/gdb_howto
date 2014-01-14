@@ -1,0 +1,9 @@
+simulavr
+
+simulavr -d atmega328 -f main.elf -g
+avr-gdb 
+	file main.elf
+	load
+	step - to run till next C line
+	break main.c:68 
+	info breakpoints ( disable 1 ) clear main.c:68 - to delete breakpoint
