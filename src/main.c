@@ -9,14 +9,13 @@
 extern void init_print ( void );
 void timer1_init ( void );
 
+extern void function_1 ( void ) __attribute__ ( ( naked ) );
+extern void function_2 ( void ) __attribute__ ( ( naked ) );
+extern void function_3 ( void ) __attribute__ ( ( naked ) );
+
 void blink_led ( void );
 
 void TIMER1_COMPA_vect ( void ) __attribute__ ( ( signal, naked ) );
-
-void function_1 ( void ) __attribute__ ( ( naked ) );
-void function_2 ( void ) __attribute__ ( ( naked ) );
-void function_3 ( void ) __attribute__ ( ( naked ) );
-
 uint16_t main_sp;
 
 uint16_t fn1_sp;
@@ -37,7 +36,7 @@ void TIMER1_COMPA_vect ( void )
   {
 	  number = 2;
 	  ptr_sp = &fn1_sp;
-	  LOAD_PTR_TO_SP();
+	  LOAD_PTR_TO_SP ();
 	  
 	  if ( one_firsttime == 1 )
 	  {
@@ -56,7 +55,7 @@ void TIMER1_COMPA_vect ( void )
 	  number = 3;
 	  
 	  ptr_sp = &fn2_sp;
-	  LOAD_PTR_TO_SP();
+	  LOAD_PTR_TO_SP ();
 	  
 	  if ( two_firsttime == 1 )
 	  {
@@ -95,29 +94,7 @@ void TIMER1_COMPA_vect ( void )
   asm volatile ( "reti" );
 }
 
-void function_1 ( void )
-{
-  while (1)
-  {
-    printf ( "I am in function 1\n" );
-  }
-}
 
-void function_2 ( void )
-{
-  while (1)
-  {
-    printf ( "function 2\n" );
-  }
-}
-
-void function_3 ( void )
-{
-  while (1)
-  {
-    printf ( "fun 3\n" );
-  }
-}
 
 void blink_led ( void )
 {
