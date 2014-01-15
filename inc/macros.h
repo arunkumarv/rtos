@@ -1,7 +1,8 @@
 
 #define SRAM_END 0x08FF
-#define FUN1_SP_BASE 0x04FF
-#define FUN2_SP_BASE 0x06FF
+#define FUN1_SP_BASE 0x06FF
+#define FUN2_SP_BASE 0x04FF
+#define FUN3_SP_BASE 0x02FF
 
 #define LOAD_PTR_TO_SP() \
     asm volatile (  "lds    r26, ptr_sp     \n\t"   \
