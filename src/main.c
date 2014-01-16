@@ -35,26 +35,44 @@ void TIMER1_COMPA_vect ( void )
 {
   SAVE_CONTEXT();
   
-  if ( tcb[0].priority == 1 )
-  {
-	  tcb[0].priority = 2;
-	  tcb[1].priority = 1;
-	  
-	  ptr_sp = & ( tcb[0].stackpointer );
-	  LOAD_PTR_TO_SP ();
-	  
-	  if ( tcb[0].status == INACTIVE )
+  for ( i = 0; i < 3; i++ )
+  {		  
+	  if ( tcb[i].priority == 1 )
 	  {
-		  sei ();
-		  tcb[0].fun_ptr ();
+		  if ( i == 0 )
+		  {
+		    tcb[0].priority = 2;
+		    tcb[1].priority = 1;
+		    
+		  } else if ( i == 1 )
+		  {
+			tcb[2].priority = 1;
+			tcb[1].priority = 3;
+			
+		  } else 
+		  {			  
+			tcb[0].priority = 1;
+			tcb[2].priority = 2;
+		  }
 		  
-	  } else {  
+		  ptr_sp = & ( tcb[i].stackpointer );
+		  LOAD_PTR_TO_SP ();
 		  
-		RESTORE_CONTEXT ();
-		asm volatile ( "reti" );
+		  if ( tcb[i].status == INACTIVE )
+		  {
+			  sei ();
+			  tcb[i].fun_ptr ();
+			  
+		  } else {  
+			  
+			RESTORE_CONTEXT ();
+			asm volatile ( "reti" );
+		  }
+		  
 	  }
-	  
-  } else if ( tcb[1].priority == 1 ) {
+  }
+  /*
+   else if ( tcb[1].priority == 1 ) {
 	  
 	  tcb[2].priority = 1;
 	  tcb[1].priority = 3;
@@ -90,7 +108,7 @@ void TIMER1_COMPA_vect ( void )
 		RESTORE_CONTEXT ();
 		asm volatile ( "reti" );
 	  }
-  }
+  }*/
   /*
   for ( i = 0; i < 3; i++ )
   {
