@@ -22,33 +22,35 @@ uint16_t main_sp;
 
 uint16_t *ptr_sp;
 
-task_ctrl_block *tcb[3];
-
-uint8_t i;
+task_ctrl_block *tcb_pivot;
+static task_ctrl_block *tcb_new, *tcb_temp;
 
 void TIMER1_COMPA_vect ( void )
 {
   SAVE_CONTEXT();
   
-  for ( i = 0; i < 3; i++ )
-  {		  
-	  if ( tcb[i]->priority == 1 )
+  tcb_temp = tcb_pivot;
+  
+  while (tcb_temp != NULL )
+  {
+	  if ( tcb_temp->priority == 1 )
 	  {
-		  ptr_sp = & ( tcb[i]->stackpointer );
+		  ptr_sp = & ( tcb_temp->stackpointer );
 		  LOAD_PTR_TO_SP ();
 		  
-		  if ( tcb[i]->status == INACTIVE )
+		  if ( tcb_temp->status == INACTIVE )
 		  {
 			  sei ();
-			  tcb[i]->fun_ptr ();
+			  tcb_temp->status = ACTIVE;
+			  tcb_temp->fun_ptr ();
 			  
-		  } else {  
+		  } else {
 			  
 			RESTORE_CONTEXT ();
-			asm volatile ( "reti" );
+			asm volatile ( "reti" );			  
 		  }
-		  
 	  }
+	  tcb_temp = tcb_temp->tcb_ptr;
   }
  
   ptr_sp = &main_sp;
@@ -62,31 +64,49 @@ void blink_led ( void )
    PORTB ^= _BV ( PB5 );
 }
 
-
 int main ( void )
 {
   cli ();
   init_print ();
   timer1_init ();
   
-  tcb[0] = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb[1] = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb[2] = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_new->fun_ptr = & function_1;
+  tcb_new->priority = 1;
+  tcb_new->status = INACTIVE;
+  tcb_new->stackpointer = FUN1_SP_BASE;
+  tcb_new->tcb_ptr = NULL;
   
-  tcb[0]->fun_ptr = & function_1;
-  tcb[0]->priority = 1;
-  tcb[0]->status = INACTIVE;
-  tcb[0]->stackpointer = FUN1_SP_BASE;
+  tcb_pivot = tcb_new;
   
-  tcb[1]->fun_ptr = & function_2;
-  tcb[1]->priority = 2;
-  tcb[1]->status = INACTIVE;
-  tcb[1]->stackpointer = FUN2_SP_BASE;
+  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_new->fun_ptr = & function_2;
+  tcb_new->priority = 2;
+  tcb_new->status = INACTIVE;
+  tcb_new->stackpointer = FUN2_SP_BASE;
+  tcb_new->tcb_ptr = NULL;
   
-  tcb[2]->fun_ptr = & function_3;
-  tcb[2]->priority = 3;
-  tcb[2]->status = INACTIVE;
-  tcb[2]->stackpointer = FUN3_SP_BASE;
+  tcb_temp = tcb_pivot;
+  while (tcb_temp->tcb_ptr != NULL )
+  {
+	  tcb_temp = tcb_temp->tcb_ptr;
+  }
+  tcb_temp->tcb_ptr = tcb_new;
+  
+  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_new->fun_ptr = & function_3;
+  tcb_new->priority = 3;
+  tcb_new->status = INACTIVE;
+  tcb_new->stackpointer = FUN3_SP_BASE;
+  tcb_new->tcb_ptr = NULL;
+  
+  tcb_temp = tcb_pivot;
+  while (tcb_temp->tcb_ptr != NULL )
+  {
+	  tcb_temp = tcb_temp->tcb_ptr;
+  }
+  tcb_temp->tcb_ptr = tcb_new;
+  
   
   ptr_sp = & main_sp;
 

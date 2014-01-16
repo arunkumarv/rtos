@@ -7,14 +7,15 @@
 #define ACTIVE		1
 #define INACTIVE	0
 
-typedef struct 
-{
+typedef struct task_ctrl_block task_ctrl_block;
+
+struct task_ctrl_block {
 	void ( *fun_ptr )( void );
 	uint16_t stackpointer;
 	uint8_t priority;
 	uint8_t status;
-	
-} task_ctrl_block;
+	task_ctrl_block *tcb_ptr;
+};
 
 #define LOAD_PTR_TO_SP() \
     asm volatile (  "lds    r26, ptr_sp     \n\t"   \
