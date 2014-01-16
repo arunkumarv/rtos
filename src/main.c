@@ -39,22 +39,6 @@ void TIMER1_COMPA_vect ( void )
   {		  
 	  if ( tcb[i].priority == 1 )
 	  {
-		  if ( i == 0 )
-		  {
-		    tcb[0].priority = 2;
-		    tcb[1].priority = 1;
-		    
-		  } else if ( i == 1 )
-		  {
-			tcb[2].priority = 1;
-			tcb[1].priority = 3;
-			
-		  } else 
-		  {			  
-			tcb[0].priority = 1;
-			tcb[2].priority = 2;
-		  }
-		  
 		  ptr_sp = & ( tcb[i].stackpointer );
 		  LOAD_PTR_TO_SP ();
 		  
@@ -71,123 +55,7 @@ void TIMER1_COMPA_vect ( void )
 		  
 	  }
   }
-  /*
-   else if ( tcb[1].priority == 1 ) {
-	  
-	  tcb[2].priority = 1;
-	  tcb[1].priority = 3;
-	  
-	  ptr_sp = & ( tcb[1].stackpointer );
-	  LOAD_PTR_TO_SP ();
-	  
-	  if ( tcb[1].status == INACTIVE )
-	  {
-		  sei ();
-		  tcb[1].fun_ptr ();
-		  
-	  } else {  
-		  
-		RESTORE_CONTEXT ();
-		asm volatile ( "reti" );
-	  }
-  } else if ( tcb[2].priority == 1 ) {
-	  
-	  tcb[0].priority = 1;
-	  tcb[2].priority = 2;
-	  
-	  ptr_sp = & ( tcb[1].stackpointer );
-	  LOAD_PTR_TO_SP ();
-	  
-	  if ( tcb[2].status == INACTIVE )
-	  {
-		  sei ();
-		  tcb[2].fun_ptr ();
-		  
-	  } else {  
-		  
-		RESTORE_CONTEXT ();
-		asm volatile ( "reti" );
-	  }
-  }*/
-  /*
-  for ( i = 0; i < 3; i++ )
-  {
-	  if ( tcb[i].priority == 1 )
-	  {
-		  ptr_sp = &tcb[i].stackpointer;
-		  LOAD_PTR_TO_SP();
-		  
-		  if ( tcb[i].status == INACTIVE )
-		  {
-			  printf ("----------------------------");
-			  tcb[i].status = ACTIVE;
-			  sei ();
-			  tcb[i].fun_ptr ();
-			  
-		  } else {
-			printf ("-------------fsdfsdf---------------");
-			RESTORE_CONTEXT ();
-			asm volatile ( "reti" );
-		  }
-	  }
-  }*/
-  /*
-  if ( number == 1 )
-  {
-	  number = 2;
-	  ptr_sp = &fn1_sp;
-	  LOAD_PTR_TO_SP ();
-	  
-	  if ( one_firsttime == 1 )
-	  {
-		one_firsttime = 0;
-		sei ();		
-		function_1 ();
-		
-	  } else {
-		  		  
-		RESTORE_CONTEXT ();
-		asm volatile ( "reti" );
-	  }
-	  
-  } else if ( number == 2 ){
-	  
-	  number = 3;
-	  
-	  ptr_sp = &fn2_sp;
-	  LOAD_PTR_TO_SP ();
-	  
-	  if ( two_firsttime == 1 )
-	  {
-		two_firsttime = 0;
-		sei ();		
-		function_2 ();
-		
-	  } else {
-		  		  
-		RESTORE_CONTEXT ();
-		asm volatile ( "reti" );
-	  }
-  }  else {
-	  
-	  number = 1;
-	  
-	  ptr_sp = &fn3_sp;
-	  LOAD_PTR_TO_SP();
-	  
-	  if ( three_firsttime == 1 )
-	  {
-		three_firsttime = 0;
-		sei ();		
-		function_3 ();
-		
-	  } else {
-		  		  
-		RESTORE_CONTEXT ();
-		asm volatile ( "reti" );
-	  }
-  }
-  */
+ 
   ptr_sp = &main_sp;
   LOAD_PTR_TO_SP();
   RESTORE_CONTEXT();
