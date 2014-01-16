@@ -1,11 +1,15 @@
 #include <stdio.h>
+#include <macros.h>
 
 void function_1 ( void ) __attribute__ ( ( naked ) );
 void function_2 ( void ) __attribute__ ( ( naked ) );
 void function_3 ( void ) __attribute__ ( ( naked ) );
 
+extern task_ctrl_block tcb[3]; 
+
 void function_1 ( void )
 {
+	
   while (1)
   {
     printf ( "I am in function 1\n" );

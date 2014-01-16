@@ -7,15 +7,11 @@
 #define F_CPU 16000000UL
 
 extern void init_print ( void );
-void timer1_init ( void );
+extern void timer1_init ( void );
 
 extern void function_1 ( void ) __attribute__ ( ( naked ) );
 extern void function_2 ( void ) __attribute__ ( ( naked ) );
 extern void function_3 ( void ) __attribute__ ( ( naked ) );
-
-void ( *fun_1_ptr ) ( void );
-void ( *fun_2_ptr ) ( void );
-void ( *fun_3_ptr ) ( void );
 
 void blink_led ( void );
 
@@ -31,10 +27,93 @@ uint16_t *ptr_sp;
 uint8_t number = 1;
 uint8_t one_firsttime = 1, two_firsttime = 1, three_firsttime = 1;
 
+task_ctrl_block tcb[3];
+
+uint8_t i;
+
 void TIMER1_COMPA_vect ( void )
 {
   SAVE_CONTEXT();
   
+  if ( tcb[0].priority == 1 )
+  {
+	  tcb[0].priority = 2;
+	  tcb[1].priority = 1;
+	  
+	  ptr_sp = & ( tcb[0].stackpointer );
+	  LOAD_PTR_TO_SP ();
+	  
+	  if ( tcb[0].status == INACTIVE )
+	  {
+		  sei ();
+		  tcb[0].fun_ptr ();
+		  
+	  } else {  
+		  
+		RESTORE_CONTEXT ();
+		asm volatile ( "reti" );
+	  }
+	  
+  } else if ( tcb[1].priority == 1 ) {
+	  
+	  tcb[2].priority = 1;
+	  tcb[1].priority = 3;
+	  
+	  ptr_sp = & ( tcb[1].stackpointer );
+	  LOAD_PTR_TO_SP ();
+	  
+	  if ( tcb[1].status == INACTIVE )
+	  {
+		  sei ();
+		  tcb[1].fun_ptr ();
+		  
+	  } else {  
+		  
+		RESTORE_CONTEXT ();
+		asm volatile ( "reti" );
+	  }
+  } else if ( tcb[2].priority == 1 ) {
+	  
+	  tcb[0].priority = 1;
+	  tcb[2].priority = 2;
+	  
+	  ptr_sp = & ( tcb[1].stackpointer );
+	  LOAD_PTR_TO_SP ();
+	  
+	  if ( tcb[2].status == INACTIVE )
+	  {
+		  sei ();
+		  tcb[2].fun_ptr ();
+		  
+	  } else {  
+		  
+		RESTORE_CONTEXT ();
+		asm volatile ( "reti" );
+	  }
+  }
+  /*
+  for ( i = 0; i < 3; i++ )
+  {
+	  if ( tcb[i].priority == 1 )
+	  {
+		  ptr_sp = &tcb[i].stackpointer;
+		  LOAD_PTR_TO_SP();
+		  
+		  if ( tcb[i].status == INACTIVE )
+		  {
+			  printf ("----------------------------");
+			  tcb[i].status = ACTIVE;
+			  sei ();
+			  tcb[i].fun_ptr ();
+			  
+		  } else {
+			printf ("-------------fsdfsdf---------------");
+			RESTORE_CONTEXT ();
+			asm volatile ( "reti" );
+		  }
+	  }
+  }*/
+  /*
   if ( number == 1 )
   {
 	  number = 2;
@@ -45,7 +124,7 @@ void TIMER1_COMPA_vect ( void )
 	  {
 		one_firsttime = 0;
 		sei ();		
-		fun_1_ptr ();
+		function_1 ();
 		
 	  } else {
 		  		  
@@ -64,7 +143,7 @@ void TIMER1_COMPA_vect ( void )
 	  {
 		two_firsttime = 0;
 		sei ();		
-		fun_2_ptr ();
+		function_2 ();
 		
 	  } else {
 		  		  
@@ -82,7 +161,7 @@ void TIMER1_COMPA_vect ( void )
 	  {
 		three_firsttime = 0;
 		sei ();		
-		fun_3_ptr ();
+		function_3 ();
 		
 	  } else {
 		  		  
@@ -90,7 +169,7 @@ void TIMER1_COMPA_vect ( void )
 		asm volatile ( "reti" );
 	  }
   }
-  
+  */
   ptr_sp = &main_sp;
   LOAD_PTR_TO_SP();
   RESTORE_CONTEXT();
@@ -112,9 +191,17 @@ int main ( void )
   fn2_sp = FUN2_SP_BASE;
   fn3_sp = FUN3_SP_BASE;
   
-  fun_1_ptr = &function_1;
-  fun_2_ptr = &function_2;
-  fun_3_ptr = &function_3;
+  tcb[0].fun_ptr = & function_1;
+  tcb[0].priority = 1;
+  tcb[0].status = INACTIVE;
+  
+  tcb[1].fun_ptr = & function_2;
+  tcb[1].priority = 2;
+  tcb[1].status = INACTIVE;
+  
+  tcb[2].fun_ptr = & function_3;
+  tcb[2].priority = 3;
+  tcb[2].status = INACTIVE;
   
   ptr_sp = & main_sp;
 
@@ -127,19 +214,4 @@ int main ( void )
   }
 
   return 0;
-}
-
-void timer1_init ( void ) 
-{
-    OCR1A = 0xFFFE;
-
-    TCCR1B |= ( 1 << WGM12 );
-    // Mode 4, CTC on OCR1A
-
-    TIMSK1 |= ( 1 << OCIE1A );
-    //Set interrupt on compare match
-
-//    TCCR1B |= ( 1 << CS12 ) | ( 1 << CS10 ); //1024
-    TCCR1B |= ( 1 << CS12 ); //256
-
 }

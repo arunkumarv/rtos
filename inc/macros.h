@@ -4,6 +4,18 @@
 #define FUN2_SP_BASE 0x04FF
 #define FUN3_SP_BASE 0x02FF
 
+#define ACTIVE		1
+#define INACTIVE	0
+
+typedef struct 
+{
+	void ( *fun_ptr )( void );
+	uint16_t stackpointer;
+	uint8_t priority;
+	uint8_t status;
+	
+} task_ctrl_block;
+
 #define LOAD_PTR_TO_SP() \
     asm volatile (  "lds    r26, ptr_sp     \n\t"   \
                   "lds    r27, ptr_sp + 1 \n\t"   \
