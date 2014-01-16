@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -16,18 +17,12 @@ extern void function_3 ( void ) __attribute__ ( ( naked ) );
 void blink_led ( void );
 
 void TIMER1_COMPA_vect ( void ) __attribute__ ( ( signal, naked ) );
-uint16_t main_sp;
 
-uint16_t fn1_sp;
-uint16_t fn2_sp;
-uint16_t fn3_sp;
+uint16_t main_sp;
 
 uint16_t *ptr_sp;
 
-uint8_t number = 1;
-uint8_t one_firsttime = 1, two_firsttime = 1, three_firsttime = 1;
-
-task_ctrl_block tcb[3];
+task_ctrl_block *tcb[3];
 
 uint8_t i;
 
@@ -37,15 +32,15 @@ void TIMER1_COMPA_vect ( void )
   
   for ( i = 0; i < 3; i++ )
   {		  
-	  if ( tcb[i].priority == 1 )
+	  if ( tcb[i]->priority == 1 )
 	  {
-		  ptr_sp = & ( tcb[i].stackpointer );
+		  ptr_sp = & ( tcb[i]->stackpointer );
 		  LOAD_PTR_TO_SP ();
 		  
-		  if ( tcb[i].status == INACTIVE )
+		  if ( tcb[i]->status == INACTIVE )
 		  {
 			  sei ();
-			  tcb[i].fun_ptr ();
+			  tcb[i]->fun_ptr ();
 			  
 		  } else {  
 			  
@@ -67,27 +62,31 @@ void blink_led ( void )
    PORTB ^= _BV ( PB5 );
 }
 
+
 int main ( void )
 {
   cli ();
   init_print ();
   timer1_init ();
   
-  fn1_sp = FUN1_SP_BASE;
-  fn2_sp = FUN2_SP_BASE;
-  fn3_sp = FUN3_SP_BASE;
+  tcb[0] = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb[1] = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb[2] = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
   
-  tcb[0].fun_ptr = & function_1;
-  tcb[0].priority = 1;
-  tcb[0].status = INACTIVE;
+  tcb[0]->fun_ptr = & function_1;
+  tcb[0]->priority = 1;
+  tcb[0]->status = INACTIVE;
+  tcb[0]->stackpointer = FUN1_SP_BASE;
   
-  tcb[1].fun_ptr = & function_2;
-  tcb[1].priority = 2;
-  tcb[1].status = INACTIVE;
+  tcb[1]->fun_ptr = & function_2;
+  tcb[1]->priority = 2;
+  tcb[1]->status = INACTIVE;
+  tcb[1]->stackpointer = FUN2_SP_BASE;
   
-  tcb[2].fun_ptr = & function_3;
-  tcb[2].priority = 3;
-  tcb[2].status = INACTIVE;
+  tcb[2]->fun_ptr = & function_3;
+  tcb[2]->priority = 3;
+  tcb[2]->status = INACTIVE;
+  tcb[2]->stackpointer = FUN3_SP_BASE;
   
   ptr_sp = & main_sp;
 
