@@ -13,6 +13,10 @@ extern void function_1 ( void ) __attribute__ ( ( naked ) );
 extern void function_2 ( void ) __attribute__ ( ( naked ) );
 extern void function_3 ( void ) __attribute__ ( ( naked ) );
 
+void ( *fun_1_ptr ) ( void );
+void ( *fun_2_ptr ) ( void );
+void ( *fun_3_ptr ) ( void );
+
 void blink_led ( void );
 
 void TIMER1_COMPA_vect ( void ) __attribute__ ( ( signal, naked ) );
@@ -26,7 +30,6 @@ uint16_t *ptr_sp;
 
 uint8_t number = 1;
 uint8_t one_firsttime = 1, two_firsttime = 1, three_firsttime = 1;
-
 
 void TIMER1_COMPA_vect ( void )
 {
@@ -42,7 +45,7 @@ void TIMER1_COMPA_vect ( void )
 	  {
 		one_firsttime = 0;
 		sei ();		
-		function_1 ();
+		fun_1_ptr ();
 		
 	  } else {
 		  		  
@@ -61,7 +64,7 @@ void TIMER1_COMPA_vect ( void )
 	  {
 		two_firsttime = 0;
 		sei ();		
-		function_2 ();
+		fun_2_ptr ();
 		
 	  } else {
 		  		  
@@ -79,7 +82,7 @@ void TIMER1_COMPA_vect ( void )
 	  {
 		three_firsttime = 0;
 		sei ();		
-		function_3 ();
+		fun_3_ptr ();
 		
 	  } else {
 		  		  
@@ -93,8 +96,6 @@ void TIMER1_COMPA_vect ( void )
   RESTORE_CONTEXT();
   asm volatile ( "reti" );
 }
-
-
 
 void blink_led ( void )
 {
@@ -110,6 +111,10 @@ int main ( void )
   fn1_sp = FUN1_SP_BASE;
   fn2_sp = FUN2_SP_BASE;
   fn3_sp = FUN3_SP_BASE;
+  
+  fun_1_ptr = &function_1;
+  fun_2_ptr = &function_2;
+  fun_3_ptr = &function_3;
   
   ptr_sp = & main_sp;
 
