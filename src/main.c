@@ -64,20 +64,27 @@ void blink_led ( void )
    PORTB ^= _BV ( PB5 );
 }
 
+task_ctrl_block * createTask ( uint8_t priority, uint16_t sp_base )
+{
+  task_ctrl_block *tcb_local;
+  
+  tcb_local = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_local->fun_ptr = & function_1;
+  tcb_local->priority = priority;
+  tcb_local->status = INACTIVE;
+  tcb_local->stackpointer = sp_base;
+  tcb_local->tcb_ptr = NULL;
+  
+  return tcb_local;
+}
+
 int main ( void )
 {
   cli ();
   init_print ();
   timer1_init ();
   
-  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_new->fun_ptr = & function_1;
-  tcb_new->priority = 1;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = FUN1_SP_BASE;
-  tcb_new->tcb_ptr = NULL;
-  
-  tcb_pivot = tcb_new;
+  tcb_pivot = createTask ( 1, FUN1_SP_BASE );
   
   tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
   tcb_new->fun_ptr = & function_2;
