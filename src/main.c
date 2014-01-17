@@ -14,8 +14,6 @@ extern void function_1 ( void ) __attribute__ ( ( naked ) );
 extern void function_2 ( void ) __attribute__ ( ( naked ) );
 extern void function_3 ( void ) __attribute__ ( ( naked ) );
 
-void blink_led ( void );
-
 void TIMER1_COMPA_vect ( void ) __attribute__ ( ( signal, naked ) );
 
 uint16_t main_sp;
@@ -23,7 +21,8 @@ uint16_t main_sp;
 uint16_t *ptr_sp;
 
 task_ctrl_block *tcb_pivot;
-static task_ctrl_block *tcb_new, *tcb_temp;
+
+static task_ctrl_block *tcb_temp;
 
 void TIMER1_COMPA_vect ( void )
 {
@@ -38,10 +37,10 @@ void TIMER1_COMPA_vect ( void )
 		  ptr_sp = & ( tcb_temp->stackpointer );
 		  LOAD_PTR_TO_SP ();
 		  
-		  if ( tcb_temp->status == INACTIVE )
+		  if ( tcb_temp->status == NOT_RUNNING )
 		  {
 			  sei ();
-			  tcb_temp->status = ACTIVE;
+			  tcb_temp->status = RUNNING;
 			  tcb_temp->fun_ptr ();
 			  
 		  } else {
@@ -59,9 +58,33 @@ void TIMER1_COMPA_vect ( void )
   asm volatile ( "reti" );
 }
 
-void blink_led ( void )
+void createTask ( void (* function_pointer) ( void ), uint8_t priority, uint16_t sp_base )
 {
-   PORTB ^= _BV ( PB5 );
+  task_ctrl_block *tcb_new;
+	
+  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_new->fun_ptr = function_pointer;
+  tcb_new->priority = priority;
+  tcb_new->status = NOT_RUNNING;
+  tcb_new->stackpointer = sp_base;
+  tcb_new->tcb_ptr = NULL;
+  
+  /*error*/
+  tcb_temp = tcb_pivot;
+  
+  if ( tcb_temp == NULL)
+  {
+	  tcb_pivot = tcb_new;
+  }
+  else
+  {
+	  while ( tcb_temp->tcb_ptr != NULL )
+	  {
+		  tcb_temp = tcb_temp->tcb_ptr;
+	  }
+	  
+	  tcb_temp->tcb_ptr = tcb_new;
+  }
 }
 
 int main ( void )
@@ -70,47 +93,17 @@ int main ( void )
   init_print ();
   timer1_init ();
   
-  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_new->fun_ptr = & function_1;
-  tcb_new->priority = 1;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = FUN1_SP_BASE;
-  tcb_new->tcb_ptr = NULL;
-  
-  tcb_pivot = tcb_new;
-  
-  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_new->fun_ptr = & function_2;
-  tcb_new->priority = 2;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = FUN2_SP_BASE;
-  tcb_new->tcb_ptr = NULL;
-  
-  tcb_temp = tcb_pivot;
-  while (tcb_temp->tcb_ptr != NULL )
-  {
-	  tcb_temp = tcb_temp->tcb_ptr;
-  }
-  tcb_temp->tcb_ptr = tcb_new;
-  
-  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_new->fun_ptr = & function_3;
-  tcb_new->priority = 3;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = FUN3_SP_BASE;
-  tcb_new->tcb_ptr = NULL;
-  
-  tcb_temp = tcb_pivot;
-  while (tcb_temp->tcb_ptr != NULL )
-  {
-	  tcb_temp = tcb_temp->tcb_ptr;
-  }
-  tcb_temp->tcb_ptr = tcb_new;
-  
-  
-  ptr_sp = & main_sp;
+  tcb_pivot = NULL;
 
-  DDRB |= _BV ( DDB5 ); /* for led in arduino pin 13 */
+  createTask ( &function_1, 1, FUN1_SP_BASE );
+  
+  
+  createTask ( &function_2, 2, FUN2_SP_BASE );
+  
+  
+  createTask ( &function_3, 3, FUN3_SP_BASE );
+  
+  
   
   sei ();  
 
