@@ -23,7 +23,8 @@ uint16_t main_sp;
 uint16_t *ptr_sp;
 
 task_ctrl_block *tcb_pivot;
-static task_ctrl_block *tcb_new, *tcb_temp;
+
+static task_ctrl_block *tcb_temp;
 
 void TIMER1_COMPA_vect ( void )
 {
@@ -64,18 +65,31 @@ void blink_led ( void )
    PORTB ^= _BV ( PB5 );
 }
 
-task_ctrl_block * createTask ( uint8_t priority, uint16_t sp_base )
+void createTask ( void ( * function_ptr )( void ), uint8_t priority, uint16_t sp_base )
 {
-  task_ctrl_block *tcb_local;
+  task_ctrl_block *tcb_new, *tcb_local;
   
-  tcb_local = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_local->fun_ptr = & function_1;
-  tcb_local->priority = priority;
-  tcb_local->status = INACTIVE;
-  tcb_local->stackpointer = sp_base;
-  tcb_local->tcb_ptr = NULL;
+  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  tcb_new->fun_ptr = function_ptr;
+  tcb_new->priority = priority;
+  tcb_new->status = INACTIVE;
+  tcb_new->stackpointer = sp_base;
+  tcb_new->tcb_ptr = NULL;
   
-  return tcb_local;
+  if ( tcb_pivot == NULL )
+  {
+	  tcb_pivot = tcb_new;
+  }
+  else 
+  {
+	  tcb_local = tcb_pivot;
+	  
+	  while ( tcb_local->tcb_ptr != NULL )
+	  {
+		  tcb_local = tcb_local->tcb_ptr;
+	  }
+	  tcb_local->tcb_ptr = tcb_new;
+  }
 }
 
 int main ( void )
@@ -84,36 +98,13 @@ int main ( void )
   init_print ();
   timer1_init ();
   
-  tcb_pivot = createTask ( 1, FUN1_SP_BASE );
+  tcb_pivot = NULL;
   
-  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_new->fun_ptr = & function_2;
-  tcb_new->priority = 2;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = FUN2_SP_BASE;
-  tcb_new->tcb_ptr = NULL;
+  createTask ( &function_1, 1, FUN1_SP_BASE );
   
-  tcb_temp = tcb_pivot;
-  while (tcb_temp->tcb_ptr != NULL )
-  {
-	  tcb_temp = tcb_temp->tcb_ptr;
-  }
-  tcb_temp->tcb_ptr = tcb_new;
+  createTask ( &function_2, 2, FUN2_SP_BASE );
   
-  tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
-  tcb_new->fun_ptr = & function_3;
-  tcb_new->priority = 3;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = FUN3_SP_BASE;
-  tcb_new->tcb_ptr = NULL;
-  
-  tcb_temp = tcb_pivot;
-  while (tcb_temp->tcb_ptr != NULL )
-  {
-	  tcb_temp = tcb_temp->tcb_ptr;
-  }
-  tcb_temp->tcb_ptr = tcb_new;
-  
+  createTask ( &function_3, 3, FUN3_SP_BASE );
   
   ptr_sp = & main_sp;
 

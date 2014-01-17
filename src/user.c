@@ -28,14 +28,14 @@ void function_2 ( void )
 {
   while (1)
   {
-	tcb_temp = tcb_pivot;
+	  tcb_temp = tcb_pivot;
 	  tcb_temp->priority = 3;
 	  tcb_temp = tcb_temp->tcb_ptr;
 	  tcb_temp->priority = 2;
 	  tcb_temp = tcb_temp->tcb_ptr;
 	  tcb_temp->priority = 1;
 	  tcb_temp = tcb_temp->tcb_ptr;
-    printf ( "function 2\n" );
+      printf ( "function 2\n" );
   }
 }
 
@@ -43,13 +43,13 @@ void function_3 ( void )
 {
   while (1)
   {
-	tcb_temp = tcb_pivot;
+	  tcb_temp = tcb_pivot;
 	  tcb_temp->priority = 1;
 	  tcb_temp = tcb_temp->tcb_ptr;
 	  tcb_temp->priority = 2;
 	  tcb_temp = tcb_temp->tcb_ptr;
 	  tcb_temp->priority = 3;
 	  tcb_temp = tcb_temp->tcb_ptr;
-    printf ( "fun 3\n" );
+      printf ( "fun 3\n" );
   }
 }
