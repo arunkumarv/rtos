@@ -24,6 +24,8 @@ uint16_t *ptr_sp;
 
 task_ctrl_block *tcb_pivot;
 
+uint16_t stack_booked;
+
 static task_ctrl_block *tcb_temp;
 
 void TIMER1_COMPA_vect ( void )
@@ -39,10 +41,10 @@ void TIMER1_COMPA_vect ( void )
 		  ptr_sp = & ( tcb_temp->stackpointer );
 		  LOAD_PTR_TO_SP ();
 		  
-		  if ( tcb_temp->status == INACTIVE )
+		  if ( tcb_temp->status == NOT_RUNNING )
 		  {
 			  sei ();
-			  tcb_temp->status = ACTIVE;
+			  tcb_temp->status = RUNNING;
 			  tcb_temp->fun_ptr ();
 			  
 		  } else {
@@ -60,20 +62,23 @@ void TIMER1_COMPA_vect ( void )
   asm volatile ( "reti" );
 }
 
-void blink_led ( void )
-{
-   PORTB ^= _BV ( PB5 );
-}
 
-void createTask ( void ( * function_ptr )( void ), uint8_t priority, uint16_t sp_base )
+void createTask ( void ( * function_ptr )( void ), uint8_t priority, uint16_t stack_size )
 {
   task_ctrl_block *tcb_new, *tcb_local;
   
   tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
+  
   tcb_new->fun_ptr = function_ptr;
+  
   tcb_new->priority = priority;
-  tcb_new->status = INACTIVE;
-  tcb_new->stackpointer = sp_base;
+  
+  tcb_new->status = NOT_RUNNING;
+  
+  tcb_new->stackpointer = USER_STACK_BASE - stack_booked;
+  
+  stack_booked += stack_size;
+  
   tcb_new->tcb_ptr = NULL;
   
   if ( tcb_pivot == NULL )
@@ -95,26 +100,26 @@ void createTask ( void ( * function_ptr )( void ), uint8_t priority, uint16_t sp
 int main ( void )
 {
   cli ();
+  
   init_print ();
+  
   timer1_init ();
   
   tcb_pivot = NULL;
   
-  createTask ( &function_1, 1, FUN1_SP_BASE );
+  stack_booked = 0;
   
-  createTask ( &function_2, 2, FUN2_SP_BASE );
+  createTask ( &function_1, 1, 200 );
   
-  createTask ( &function_3, 3, FUN3_SP_BASE );
+  createTask ( &function_2, 2, 200 );
+  
+  createTask ( &function_3, 3, 200 );
   
   ptr_sp = & main_sp;
-
-  DDRB |= _BV ( DDB5 ); /* for led in arduino pin 13 */
   
   sei ();  
 
-  while (1)
-  {
-  }
+  for (;;);
 
   return 0;
 }

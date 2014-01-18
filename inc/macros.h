@@ -1,11 +1,10 @@
 
-#define SRAM_END 0x08FF
-#define FUN1_SP_BASE 0x06FF
-#define FUN2_SP_BASE 0x04FF
-#define FUN3_SP_BASE 0x02FF
+#define RAM_START	0x0100
+#define SRAM_END 	0x08FF
+#define USER_STACK_BASE	SRAM_END - 100
 
-#define ACTIVE		1
-#define INACTIVE	0
+#define RUNNING		1
+#define NOT_RUNNING	0
 
 typedef struct task_ctrl_block task_ctrl_block;
 

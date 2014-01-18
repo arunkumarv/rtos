@@ -18,7 +18,7 @@ void function_1 ( void )
 	  tcb_temp = tcb_temp->tcb_ptr;
 	  tcb_temp->priority = 1;
 	  tcb_temp = tcb_temp->tcb_ptr;
-	  tcb_temp->priority = 2;
+	  tcb_temp->priority = 3;
 	  tcb_temp = tcb_temp->tcb_ptr;
 	  printf ( "I am in function 1\n" );
   }
