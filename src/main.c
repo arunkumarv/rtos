@@ -11,9 +11,9 @@
 extern void init_print ( void );
 extern void timer1_init ( void );
 
-extern void function_1 ( void ) __attribute__ ( ( naked ) );
-extern void function_2 ( void ) __attribute__ ( ( naked ) );
-extern void function_3 ( void ) __attribute__ ( ( naked ) );
+extern void function_1 ( void );// __attribute__ ( ( naked ) );
+extern void function_2 ( void );// __attribute__ ( ( naked ) );
+extern void function_3 ( void );// __attribute__ ( ( naked ) );
 
 void blink_led ( void );
 

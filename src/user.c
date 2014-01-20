@@ -2,9 +2,9 @@
 #include <macros.h>
 #include <avr/interrupt.h>
 
-void function_1 ( void ) __attribute__ ( ( naked ) );
-void function_2 ( void ) __attribute__ ( ( naked ) );
-void function_3 ( void ) __attribute__ ( ( naked ) );
+void function_1 ( void );// __attribute__ ( ( naked ) );
+void function_2 ( void );// __attribute__ ( ( naked ) );
+void function_3 ( void );// __attribute__ ( ( naked ) );
 
 extern task_ctrl_block *tcb_pivot; 
 
