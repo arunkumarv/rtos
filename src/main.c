@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <string.h>
 
 #include <macros.h>
 
@@ -62,8 +63,29 @@ void TIMER1_COMPA_vect ( void )
   asm volatile ( "reti" );
 }
 
+void changePriority ( char *name, uint8_t priority )
+{
+	  cli ();
+	  
+	  task_ctrl_block *tcb_local;
+	  
+	  tcb_local = tcb_pivot;
+	  
+	  while ( tcb_local != NULL )
+	  {
+		  
+		  if ( strcmp ( tcb_local->name , name ) == 0 ) 
+		  {
+			  tcb_local->priority = priority;
+		  }
+			
+		  tcb_local = tcb_local->tcb_ptr;
+	  }
+	  
+	  sei ();
+}
 
-void createTask ( void ( * function_ptr )( void ), uint8_t priority, uint16_t stack_size )
+void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t priority, uint16_t stack_size )
 {
   task_ctrl_block *tcb_new, *tcb_local;
   
@@ -76,6 +98,12 @@ void createTask ( void ( * function_ptr )( void ), uint8_t priority, uint16_t st
   tcb_new->status = NOT_RUNNING;
   
   tcb_new->stackpointer = USER_STACK_BASE - stack_booked;
+  
+  tcb_new->name = ( char * )malloc ( 20 );
+  
+  memset ( tcb_new->name, '\0', 20 );
+  
+  strcpy ( tcb_new->name, taskname );
   
   stack_booked += stack_size;
   
@@ -109,11 +137,11 @@ int main ( void )
   
   stack_booked = 0;
   
-  createTask ( &function_1, 1, 200 );
+  createTask ( &function_1, "fun_one", 1, 200 );
   
-  createTask ( &function_2, 2, 200 );
+  createTask ( &function_2, "fun_two", 2, 200 );
   
-  createTask ( &function_3, 3, 200 );
+  createTask ( &function_3, "fun_three", 3, 200 );
   
   ptr_sp = & main_sp;
   

@@ -14,6 +14,7 @@ struct task_ctrl_block {
 	uint8_t priority;
 	uint8_t status;
 	task_ctrl_block *tcb_ptr;
+	char *name;
 };
 
 #define LOAD_PTR_TO_SP() \
