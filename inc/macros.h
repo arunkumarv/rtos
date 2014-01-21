@@ -3,8 +3,12 @@
 #define SRAM_END 	0x08FF
 #define USER_STACK_BASE	SRAM_END - 100
 
-#define RUNNING		1
-#define NOT_RUNNING	0
+#define TRUE	1
+#define FALSE	!TRUE
+
+#define RUN 		0X00
+#define TERMINATE 	0X01
+#define WAIT		0X03
 
 typedef struct task_ctrl_block task_ctrl_block;
 
@@ -12,9 +16,10 @@ struct task_ctrl_block {
 	void ( *fun_ptr )( void );
 	uint16_t stackpointer;
 	uint8_t priority;
-	uint8_t status;
+	uint8_t is_firsttime;
 	task_ctrl_block *tcb_ptr;
 	char *name;
+	uint8_t status;
 };
 
 #define LOAD_PTR_TO_SP() \

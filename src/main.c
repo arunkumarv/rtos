@@ -11,9 +11,10 @@
 extern void init_print ( void );
 extern void timer1_init ( void );
 
-extern void function_1 ( void );// __attribute__ ( ( naked ) );
-extern void function_2 ( void );// __attribute__ ( ( naked ) );
-extern void function_3 ( void );// __attribute__ ( ( naked ) );
+extern void function_1 ( void );
+extern void function_2 ( void );
+extern void function_3 ( void );
+extern void function_4 ( void );
 
 void blink_led ( void );
 
@@ -23,11 +24,11 @@ uint16_t main_sp;
 
 uint16_t *ptr_sp;
 
-task_ctrl_block *tcb_pivot;
+task_ctrl_block *tcb_pivot, *tcb_run, *tcb_prev;
 
 uint16_t stack_booked;
 
-static task_ctrl_block *tcb_temp;
+task_ctrl_block *tcb_temp;
 
 void TIMER1_COMPA_vect ( void )
 {
@@ -35,28 +36,55 @@ void TIMER1_COMPA_vect ( void )
   
   tcb_temp = tcb_pivot;
   
-  while (tcb_temp != NULL )
+  ptr_sp = & ( main_sp );
+  LOAD_PTR_TO_SP ();
+  
+  tcb_run = tcb_pivot;
+  
+  while ( tcb_temp != NULL )
   {
-	  if ( tcb_temp->priority == 1 )
+	  switch ( tcb_temp->status )
 	  {
-		  ptr_sp = & ( tcb_temp->stackpointer );
-		  LOAD_PTR_TO_SP ();
+		  case RUN:
+			if ( tcb_temp->priority < tcb_run->priority )
+			{
+				tcb_run = tcb_temp;
+			}
+		  break;
 		  
-		  if ( tcb_temp->status == NOT_RUNNING )
-		  {
-			  sei ();
-			  tcb_temp->status = RUNNING;
-			  tcb_temp->fun_ptr ();
-			  
-		  } else {
-			  
-			RESTORE_CONTEXT ();
-			asm volatile ( "reti" );			  
-		  }
+		  case TERMINATE:
+			tcb_prev->tcb_ptr = tcb_temp->tcb_ptr;
+			free ( tcb_temp );
+			tcb_temp = tcb_prev->tcb_ptr;
+			continue;
+		  break;
+		  
+		  case WAIT:
+		  break;
+		  
+		  default:
+		  break;
 	  }
+	  tcb_prev = tcb_temp;
 	  tcb_temp = tcb_temp->tcb_ptr;
   }
- 
+  
+  ptr_sp = & ( tcb_run->stackpointer );
+  LOAD_PTR_TO_SP ();
+		  
+  if ( tcb_run->is_firsttime == TRUE )
+  {
+	sei ();
+	tcb_run->is_firsttime = FALSE;
+	tcb_run->fun_ptr ();
+  } 
+  else 
+  {	  
+	RESTORE_CONTEXT ();
+	asm volatile ( "reti" );			  
+  }
+  
+
   ptr_sp = &main_sp;
   LOAD_PTR_TO_SP();
   RESTORE_CONTEXT();
@@ -95,7 +123,9 @@ void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t prior
   
   tcb_new->priority = priority;
   
-  tcb_new->status = NOT_RUNNING;
+  tcb_new->is_firsttime = TRUE;
+  
+  tcb_new->status = RUN;
   
   tcb_new->stackpointer = USER_STACK_BASE - stack_booked;
   
@@ -142,6 +172,8 @@ int main ( void )
   createTask ( &function_2, "fun_two", 2, 200 );
   
   createTask ( &function_3, "fun_three", 3, 200 );
+  
+  createTask ( &function_4, "fun_four", 4, 50 );
   
   ptr_sp = & main_sp;
   
