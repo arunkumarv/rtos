@@ -8,7 +8,7 @@
 
 #define RUN 		0X00
 #define TERMINATE 	0X01
-#define WAIT		0X03
+#define WAIT		0X02
 
 typedef struct task_ctrl_block task_ctrl_block;
 

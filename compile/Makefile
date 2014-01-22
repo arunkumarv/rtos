@@ -1,18 +1,18 @@
 MCU=atmega328p
 SRC=../src
 INC=../inc
-OPTIONS=-Wall
+OPTIONS=-g -Wall
 
 all: main.hex main.lst main.map
 
 main.o: $(SRC)/main.c
-	avr-gcc -g $(OPTIONS) -mmcu=$(MCU) -I$(INC) -c $(SRC)/main.c -o main.o
+	avr-gcc $(OPTIONS) -mmcu=$(MCU) -I$(INC) -c $(SRC)/main.c -o main.o
 
 util.o: $(SRC)/util.c
-	avr-gcc -g $(OPTIONS) -mmcu=$(MCU) -I$(INC) -c $(SRC)/util.c -o util.o
+	avr-gcc $(OPTIONS) -mmcu=$(MCU) -I$(INC) -c $(SRC)/util.c -o util.o
 
 task.o: $(SRC)/task.c
-	avr-gcc -g $(OPTIONS) -mmcu=$(MCU) -I$(INC) -c $(SRC)/task.c -o task.o
+	avr-gcc $(OPTIONS) -mmcu=$(MCU) -I$(INC) -c $(SRC)/task.c -o task.o
 
 main.elf: main.o util.o task.o 
 	avr-gcc -g -mmcu=$(MCU) -o main.elf main.o util.o task.o

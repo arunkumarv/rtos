@@ -1,23 +1,20 @@
 #include <stdio.h>
-#include <macros.h>
+#include <common.h>
 #include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
 
-extern task_ctrl_block *tcb_pivot;
-
 uint16_t stack_booked;
-
-
-void TIMER1_COMPA_vect ( void ) __attribute__ ( ( signal, naked ) );
-
 uint16_t main_sp;
-
 uint16_t *ptr_sp;
 
-task_ctrl_block *tcb_pivot, *tcb_run, *tcb_prev;
+uint16_t backup_sp;
 
+task_ctrl_block *tcb_pivot, *tcb_run, *tcb_prev;
 task_ctrl_block *tcb_temp;
+task_ctrl_block *tcb_new, *tcb_local;
+
+void TIMER1_COMPA_vect ( void ) __attribute__ ( ( signal, naked ) );
 
 void timer1_init ( void ) 
 {
@@ -54,23 +51,23 @@ void TIMER1_COMPA_vect ( void )
 			{
 				tcb_run = tcb_temp;
 			}
+			tcb_prev = tcb_temp;
+			tcb_temp = tcb_temp->tcb_ptr;
 		  break;
 		  
 		  case TERMINATE:
 			tcb_prev->tcb_ptr = tcb_temp->tcb_ptr;
 			free ( tcb_temp );
 			tcb_temp = tcb_prev->tcb_ptr;
-			continue;
 		  break;
 		  
 		  case WAIT:
+		    tcb_temp = tcb_temp->tcb_ptr;
 		  break;
 		  
 		  default:
 		  break;
-	  }
-	  tcb_prev = tcb_temp;
-	  tcb_temp = tcb_temp->tcb_ptr;
+	  }	  
   }
   
   ptr_sp = & ( tcb_run->stackpointer );
@@ -119,8 +116,6 @@ void changePriority ( char *name, uint8_t priority )
 {
 	  cli ();
 	  
-	  task_ctrl_block *tcb_local;
-	  
 	  tcb_local = tcb_pivot;
 	  
 	  while ( tcb_local != NULL )
@@ -137,9 +132,29 @@ void changePriority ( char *name, uint8_t priority )
 	  sei ();
 }
 
+void changeStatus ( char *name, uint8_t status )
+{
+	  cli ();
+	  
+	  tcb_local = tcb_pivot;
+	  
+	  while ( tcb_local != NULL )
+	  {
+		  
+		  if ( strcmp ( tcb_local->name , name ) == 0 ) 
+		  {
+			  tcb_local->status = status;
+		  }
+			
+		  tcb_local = tcb_local->tcb_ptr;
+	  }
+	  
+	  sei ();
+}
+
 void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t priority, uint16_t stack_size )
 {
-  task_ctrl_block *tcb_new, *tcb_local;
+
   
   tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
   
