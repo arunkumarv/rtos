@@ -35,11 +35,10 @@ void TIMER1_COMPA_vect ( void )
 {
   SAVE_CONTEXT();
   
-  tcb_temp = tcb_pivot;
-  
   ptr_sp = & ( main_sp );
   LOAD_PTR_TO_SP ();
   
+   tcb_temp = tcb_pivot;
   tcb_run = tcb_pivot;
   
   while ( tcb_temp != NULL )
@@ -85,7 +84,6 @@ void TIMER1_COMPA_vect ( void )
 	asm volatile ( "reti" );			  
   }
   
-
   ptr_sp = &main_sp;
   LOAD_PTR_TO_SP();
   RESTORE_CONTEXT();
@@ -150,6 +148,12 @@ void changeStatus ( char *name, uint8_t status )
 	  }
 	  
 	  sei ();
+}
+
+void deleteTask ( char *name )
+{
+	//should delete now. so change the code accordingly
+	changeStatus ( name, TERMINATE );
 }
 
 void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t priority, uint16_t stack_size )
