@@ -86,7 +86,6 @@ void function_3 ( void )
 	  changePriority ( "fun_two", 3 );
 	  changePriority ( "fun_three",5  );
 	  changePriority ( "fun_four", 2 );
-	  
       printf ( "fun_3\n" );
       
   }

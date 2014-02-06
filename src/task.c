@@ -38,14 +38,18 @@ void TIMER1_COMPA_vect ( void )
   ptr_sp = & ( main_sp );
   LOAD_PTR_TO_SP ();
   
-   tcb_temp = tcb_pivot;
-  tcb_run = tcb_pivot;
+  tcb_temp = tcb_pivot;
+  tcb_run = NULL;
   
   while ( tcb_temp != NULL )
   {
 	  switch ( tcb_temp->status )
 	  {
 		  case RUN:
+		    if ( tcb_run == NULL )
+		    {
+				tcb_run = tcb_temp;
+			}
 			if ( tcb_temp->priority < tcb_run->priority )
 			{
 				tcb_run = tcb_temp;
@@ -55,12 +59,21 @@ void TIMER1_COMPA_vect ( void )
 		  break;
 		  
 		  case TERMINATE:
-			tcb_prev->tcb_ptr = tcb_temp->tcb_ptr;
-			free ( tcb_temp );
-			tcb_temp = tcb_prev->tcb_ptr;
+			if ( tcb_temp == tcb_pivot )
+			{
+				tcb_pivot = tcb_temp->tcb_ptr;
+				free ( tcb_temp );
+				tcb_temp = tcb_pivot;
+				tcb_run = tcb_pivot;
+			} else {
+				tcb_prev->tcb_ptr = tcb_temp->tcb_ptr;
+				free ( tcb_temp );
+				tcb_temp = tcb_prev->tcb_ptr;
+			}
 		  break;
 		  
 		  case WAIT:
+		    tcb_prev = tcb_temp;
 		    tcb_temp = tcb_temp->tcb_ptr;
 		  break;
 		  
@@ -152,8 +165,29 @@ void changeStatus ( char *name, uint8_t status )
 
 void deleteTask ( char *name )
 {
-	//should delete now. so change the code accordingly
-	changeStatus ( name, TERMINATE );
+	cli ();
+	
+	tcb_temp = tcb_pivot;
+	tcb_prev = tcb_pivot;
+	
+	while ( tcb_temp != NULL )
+	{
+		if (  strcmp ( tcb_temp->name , name ) == 0 )
+		{
+			if ( tcb_temp == tcb_pivot )
+			{
+				tcb_pivot = tcb_temp->tcb_ptr;
+			} else {
+				tcb_prev->tcb_ptr = tcb_temp->tcb_ptr;
+			}
+			free ( tcb_temp );
+			break;
+		}
+		tcb_prev = tcb_temp;
+		tcb_temp = tcb_temp->tcb_ptr;
+	}
+	//changeStatus ( name, TERMINATE );
+	sei ();
 }
 
 void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t priority, uint16_t stack_size )
