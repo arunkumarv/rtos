@@ -83,6 +83,13 @@ void TIMER1_COMPA_vect ( void )
 	  }	  
   }
   //if tcb_run == NULL go to idle (load main sp and back to forloop main )
+  if ( tcb_run == NULL )
+  {
+    ptr_sp = & ( main_sp );
+    LOAD_PTR_TO_SP ();
+    RESTORE_CONTEXT ();
+	asm volatile ( "reti" );	
+  }
   
   ptr_sp = & ( tcb_run->stackpointer );
   LOAD_PTR_TO_SP ();
@@ -122,7 +129,10 @@ void startScheduler ( void )
   
   sei ();  
 
-  for (;;);
+  for (;;)
+  {
+	  printf ("in the main function\n");
+  }
 }
 
 void changePriority ( char *name, uint8_t priority )

@@ -100,7 +100,10 @@ void function_4 ( void )
 	  changePriority ( "fun_two", 3 );
 	  changePriority ( "fun_three", 4 );
 	  changePriority ( "fun_four", 5 );
-	  
+	  deleteTask  ( "fun_one" );
+	  deleteTask  ( "fun_two" );
+	  deleteTask  ( "fun_three" );
+	  deleteTask   ( "fun_four" );
       printf ( "fun_ffffffoooouuurrrr\n" );
       
   }
