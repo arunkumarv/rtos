@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
+#include <avr/sleep.h>
 
 uint16_t stack_booked;
 uint16_t main_sp;
@@ -127,11 +128,15 @@ void startScheduler ( void )
 {
   ptr_sp = & main_sp;
   
+  set_sleep_mode ( SLEEP_MODE_IDLE ); 
+  sleep_enable ();
+  
   sei ();  
 
-  for (;;)
+  while (1) 
   {
-	  printf ("in the main function\n");
+   sleep_mode ();
+   printf ("sleep_mode_main_function\n");
   }
 }
 
