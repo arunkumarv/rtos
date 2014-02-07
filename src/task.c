@@ -49,11 +49,13 @@ void TIMER1_COMPA_vect ( void )
 		    if ( tcb_run == NULL )
 		    {
 				tcb_run = tcb_temp;
-			}
-			if ( tcb_temp->priority < tcb_run->priority )
+			} else
 			{
+			  if ( tcb_temp->priority < tcb_run->priority )
+			  {
 				tcb_run = tcb_temp;
-			}
+			  }
+		    }
 			tcb_prev = tcb_temp;
 			tcb_temp = tcb_temp->tcb_ptr;
 		  break;
@@ -64,7 +66,6 @@ void TIMER1_COMPA_vect ( void )
 				tcb_pivot = tcb_temp->tcb_ptr;
 				free ( tcb_temp );
 				tcb_temp = tcb_pivot;
-				tcb_run = tcb_pivot;
 			} else {
 				tcb_prev->tcb_ptr = tcb_temp->tcb_ptr;
 				free ( tcb_temp );
@@ -81,6 +82,7 @@ void TIMER1_COMPA_vect ( void )
 		  break;
 	  }	  
   }
+  //if tcb_run == NULL go to idle (load main sp and back to forloop main )
   
   ptr_sp = & ( tcb_run->stackpointer );
   LOAD_PTR_TO_SP ();
@@ -155,6 +157,7 @@ void changeStatus ( char *name, uint8_t status )
 		  if ( strcmp ( tcb_local->name , name ) == 0 ) 
 		  {
 			  tcb_local->status = status;
+			  break;
 		  }
 			
 		  tcb_local = tcb_local->tcb_ptr;
@@ -191,9 +194,7 @@ void deleteTask ( char *name )
 }
 
 void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t priority, uint16_t stack_size )
-{
-
-  
+{ 
   tcb_new = ( task_ctrl_block * ) malloc ( sizeof ( task_ctrl_block ) );
   
   tcb_new->fun_ptr = function_ptr;
