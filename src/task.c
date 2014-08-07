@@ -107,6 +107,7 @@ void TIMER1_COMPA_vect ( void )
 	asm volatile ( "reti" );			  
   }
   
+  //never reaching point
   ptr_sp = &main_sp;
   LOAD_PTR_TO_SP();
   RESTORE_CONTEXT();
@@ -186,6 +187,7 @@ void deleteTask ( char *name )
 	cli ();
 	
 	tcb_temp = tcb_pivot;
+	
 	tcb_prev = tcb_pivot;
 	
 	while ( tcb_temp != NULL )
@@ -222,7 +224,7 @@ void createTask ( void ( * function_ptr )( void ), char *taskname, uint8_t prior
   
   tcb_new->stackpointer = USER_STACK_BASE - stack_booked;
   
-  tcb_new->name = ( char * )malloc ( 20 );
+  tcb_new->name = ( char * ) malloc ( 20 );
   
   memset ( tcb_new->name, '\0', 20 );
   
