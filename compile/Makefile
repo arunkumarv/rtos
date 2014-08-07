@@ -2,6 +2,7 @@ MCU=atmega328p
 SRC=../src
 INC=../inc
 OPTIONS=-g -Wall
+DEVICE=/dev/ttyACM0
 
 all: main.hex main.lst main.map
 
@@ -28,7 +29,7 @@ main.map: main.elf
 	avr-size main.elf
 
 burn:
-	avrdude -F -V -c arduino -p $(MCU) -P /dev/ttyACM0 -b 115200 -U flash:w:main.hex
+	avrdude -F -V -c arduino -p $(MCU) -P $(DEVICE) -b 115200 -U flash:w:main.hex
 
 clean:
 	rm -rf main.elf main.hex main.lst main.map *.o

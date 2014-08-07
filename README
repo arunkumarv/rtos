@@ -1,0 +1,42 @@
+Arun <arunkumarv31@gmail.com>
+Blog: http://arunkumarv.blogspot.com
+Facebook: http://facebook.com/akv31
+
+This is a simple task switching system for avr ( specifically Atmega328p ).
+For a demo go to http://arunkumarv.blogspot.in/2014/01/an-rtos-from-group-up.html
+
+How to 
+---------------------------------
+* Install avr toolchain, minicom
+  For debian distros: sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
+
+* Need an Arduino UNO board.
+  Connect the board to the system. Open ./compile/Makefile. DEVICE= option with the new 'tty' device name populated in /dev folder.
+
+Compile and burn
+----------------
+cd ./compile
+make
+sudo make burn
+
+sudo minicom -s
+* Select - Serial port setup
+* Change settings to the following
+  Serial Device      : /dev/ttyACM0 
+  Bps/Par/Bits       : 38400 8N1 
+  Hardware Flow Control : Yes
+  Software Flow Control : No
+* Save setup as dfl
+* Exit
+
+That is it. You can see tasks are switching and getting deleted according to our function_1, 2, 3, 4 defnitions. 
+
+Note
+----
+UNO board is not mandatory. You can have an Atmega328p configured on a breadboard. 
+Compile the code and program the chip with a burner of your choice. 
+For that change the 'burn' in Makefile according to the burner you have. 
+For to see the data printed with printf, use an FTDI breakout board and 
+configure minicom properly to view data through breakout board.
+Or a blink LED code is enough. For this change the printf statements in main with
+blink led code and connect some LEDs to the chip.
