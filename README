@@ -29,7 +29,11 @@ sudo minicom -s
 * Save setup as dfl
 * Exit
 
-That is it. You can see tasks are switching and getting deleted according to our function_1, 2, 3, 4 defnitions. 
+That is it. You can see tasks are switching and getting deleted according to our function_1, 2, 3, 4 defnitions.
+Check src/main.c. There are 4 functions, function_1 function_2 function_3 function_4.
+Fixed priority pre-emptive scheduling (FPPS) is the scheduling policy. So to switch the task priority of other functions are changing in the function.
+FPPS select the highest priority task to run.
+They are infinite loops. But every time when the scheduler executes
 
 Note
 ----
