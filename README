@@ -1,4 +1,7 @@
-This is a simple task switching system for avr ( specifically Atmega328p ).
+This is a simple task switching (An RTOS) system for avr ( specifically Atmega328p ). 
+Developed Fixed priority pre-emptive scheduling policy.
+
+Here us a screen record - https://www.youtube.com/watch?v=pLknZu1mUhs
 
 How to 
 ---------------------------------
