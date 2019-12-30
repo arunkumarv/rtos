@@ -1,18 +1,17 @@
-This is a simple task switching (An RTOS) system for avr ( specifically Atmega328p ). 
+# Task Switching code
+This is a simple task switching (An RTOS) system for avr ( specifically Atmega328p ). I was trying to implement a basic scheduler.
 Developed Fixed priority pre-emptive scheduling policy.
 
-Here us a screen record - https://www.youtube.com/watch?v=pLknZu1mUhs
+Here is a screen record - [Youtube](https://www.youtube.com/watch?v=pLknZu1mUhs)
 
-How to 
----------------------------------
-* Install avr toolchain, minicom
-  For debian distros: sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
+## How to 
+- Install avr toolchain, minicom
+- For debian distros: sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
 
-* Need an Arduino UNO board.
-  Connect the board to the system. Open ./compile/Makefile. DEVICE= option with the new 'tty' device name populated in /dev folder.
+- Need an Arduino UNO board.
+- Connect the board to the system. Open `./compile/Makefile`. DEVICE= option with the new 'tty' device name populated in /dev folder.
 
-Compile and burn
-----------------
+## Compile and burn
 cd ./compile
 make
 sudo make burn
@@ -27,7 +26,7 @@ sudo minicom -s
 * Save setup as dfl
 * Exit
 
-That is it. You can see tasks are switching and getting deleted according to our function_1, 2, 3, 4 defnitions.
+We can see tasks are switching and getting deleted according to our function_1, 2, 3, 4 defnitions.
 Check src/main.c. There are 4 functions, function_1 function_2 function_3 function_4.
 Fixed priority pre-emptive scheduling (FPPS) is the scheduling policy. So to switch the task priority of other functions are changing in the function.
 FPPS select the highest priority task to run.
