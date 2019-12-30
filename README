@@ -35,7 +35,7 @@ They are infinite loops. But every time when the scheduler executes
 
 Note
 ----
-UNO board is not mandatory. You can have an Atmega328p configured on a breadboard. 
+UNO board is not specific. You can have an Atmega328p configured on a breadboard. 
 Compile the code and program the chip with a burner of your choice. 
 For that change the 'burn' in Makefile according to the burner you have. 
 For to see the data printed with printf, use an FTDI breakout board and 
